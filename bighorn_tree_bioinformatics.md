@@ -2,6 +2,13 @@
 
 NOTES: demultiplexing happened previously based on methods of Jahner et al. (2019) Evolutionary Applications. Starting with alignment of fastqs
 
+
+GRABBING AN INTERACTIVE JOB:
+```{bash}
+salloc --account=evolgen --time=3:00:00
+```
+
+
 ## populations
 
 * California bighorn
@@ -30,3 +37,14 @@ NOTES: demultiplexing happened previously based on methods of Jahner et al. (201
     * Langley Mountain, California (SN_LM)
 
 
+## alignment (using new bighorn genome)
+
+### grabbing reference from NCBI
+```{bash}
+rsync --copy-links --recursive --times --verbose rsync://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/042/477/335/GCF_042477335.2_ARS-UI_OviCan_v2/*.fna.gz .
+
+gunzip GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna.gz
+
+grep -c "^>" GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna 
+    ## 42
+```
