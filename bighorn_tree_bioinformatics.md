@@ -48,3 +48,39 @@ gunzip GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna.gz
 grep -c "^>" GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna 
     ## 42
 ```
+
+
+
+### remove 60 line endings
+perl /home/jjahner/perl_scripts/remove60_fasta.pl GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna
+
+
+### change reference names to something shorter
+
+perl /home/jjahner/perl_scripts/rename_scaff.pl no60_GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna
+
+mv renamed_no60_GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna.txt bh2_genome.fna
+
+
+
+### make index for bwa
+
+sbatch slurm_bh2tree_bwa_index.sh
+
+
+### align 
+
+sbatch slurm_bh2tree_runbwa.sh
+
+
+
+### convert sam to bam
+
+sbatch slurm_sucker_sam2bam.sh
+
+
+
+### make bam list
+
+ls *.sorted.bam > bam_list.txt
+
