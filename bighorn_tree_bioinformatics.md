@@ -68,9 +68,22 @@ mv renamed_no60_GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna.txt bh2_genome.fna
 sbatch slurm_bh2tree_bwa_index.sh
 
 
+
 ### align 
 
 sbatch slurm_bh2tree_runbwa.sh
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
