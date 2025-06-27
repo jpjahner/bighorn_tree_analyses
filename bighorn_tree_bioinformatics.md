@@ -52,48 +52,64 @@ grep -c "^>" GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna
 
 
 ### remove 60 line endings
+```{bash}
 perl /home/jjahner/perl_scripts/remove60_fasta.pl GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna
-
+```
 
 ### change reference names to something shorter
 
+```{bash}
 perl /home/jjahner/perl_scripts/rename_scaff.pl no60_GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna
 
 mv renamed_no60_GCF_042477335.2_ARS-UI_OviCan_v2_genomic.fna.txt bh2_genome.fna
-
+```
 
 
 ### make index for bwa
 
+```{bash}
 sbatch slurm_bh2tree_bwa_index.sh
-
+```
 
 
 ### align 
 
+```{bash}
 sbatch slurm_bh2tree_runbwa.sh
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
 
 ### convert sam to bam
 
-sbatch slurm_sucker_sam2bam.sh
+```{bash}
+sbatch slurm_bh2tree_sam2bam.sh
+```
+
+
+
+### renaming south salmo files
+Originally labeled as California bighorn, but actually Rocky Mountain
+```{bash}
+rename CB_SS RB_SS aln_CB_SS*
+```
 
 
 
 ### make bam list
 
+```{bash}
 ls *.sorted.bam > bam_list.txt
+```
+
+
+
+## calling variants
+
+```{bash}
+sbatch slurm_variants.sh
+```
+
+
+
+
 
