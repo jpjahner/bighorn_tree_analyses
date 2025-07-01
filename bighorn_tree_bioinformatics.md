@@ -208,13 +208,168 @@ sed 's/SN_LM/ML/g' > bighorn_tree_10inds_pops_190_renamed.txt
 
 ```{bash}
 perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl variants_maf3_miss7.recode.vcf
+    ## Number of loci: 33084; number of individuals 190
 ```
 
 ### calculate coverage
 
 ```{bash}
-sbatch slurm_wyo_bighorn_calc_cov.sh
+sbatch slurm_bh2tree_calc_cov.sh
 ```
+
+
+### filter out over-assembled loci
+
+In R:
+```{bash}
+cut -d " " -f 1 variants_maf3_miss7.recode.mpgl > loc_names_33084.txt
+
+module load arcc/1.0 gcc/14.2.0 r/4.4.0
+R
+
+dat <- read.csv("variants_maf3_miss7.recode.mpgl_coverage.csv", header=F)
+	dim(dat)
+	dat[1:10,1:10]
+
+dat_noname <- dat[,-1]
+	dim(dat_noname)
+	dat_noname[1:10,1:10]
+
+loc_names <- read.delim("loc_names_33084.txt", header=F)
+	head(loc_names)
+
+avg_33084 <- vector()
+in_out_33084_10 <- vector()
+in_out_33084_12 <- vector()
+in_out_33084_14 <- vector()
+in_out_33084_16 <- vector()
+
+for (i in 1:33084)
+	{
+	avg <- mean(dat_noname[,i])
+	avg_33084 <- append(avg_33084, avg)
+	
+	if (avg <= 10)	{ in_out_33084_10 <- append(in_out_33084_10, 1) }
+	else			{ in_out_33084_10 <- append(in_out_33084_10, 0) }
+
+	if (avg <= 12)	{ in_out_33084_12 <- append(in_out_33084_12, 1) }
+	else			{ in_out_33084_12 <- append(in_out_33084_12, 0) }
+	
+	if (avg <= 14)	{ in_out_33084_14 <- append(in_out_33084_14, 1) }
+	else			{ in_out_33084_14 <- append(in_out_33084_14, 0) }
+	
+	if (avg <= 16)	{ in_out_33084_16 <- append(in_out_33084_16, 1) }
+	else			{ in_out_33084_16 <- append(in_out_33084_16, 0) }
+	
+	}
+
+
+
+sum(in_out_33084_10) / 33084
+	## 31172 (94.2%)
+
+sum(in_out_33084_12) / 33084
+	## 31920 (96.5%)
+	
+sum(in_out_33084_14) / 33084
+	## 32320 (97.7%)
+	
+sum(in_out_33084_16) / 33084
+	## 32523 (98.3%)
+
+ choosing to kill all locs with mean cov/ind >= 14
+
+
+
+sub_14 <- dat_noname[,in_out_33084_14==1]
+	dim(sub_14)
+sub_14_avg <- subset(avg_33084, in_out_33084_14==1)	
+
+kill_locs <- subset(loc_names, in_out_33084_14==0)
+	dim(kill_locs)
+	head(kill_locs)
+
+write.table(kill_locs, file="high_cov_loc_list_to_be_removed.txt", quote=F, row.names=F, col.names=F)
+
+quit()
+```
+
+In terminal:
+```{bash}
+sed "s/:/\t/" high_cov_loc_list_to_be_removed.txt > high_cov_loc_list_to_be_removed_tabdelim.txt
+
+module load arcc/1.0 gcc/14.2.0 bcftools/1.20 vcftools/0.1.17
+
+vcftools --vcf variants_maf3_miss7.recode.vcf --exclude-positions high_cov_loc_list_to_be_removed_tabdelim.txt --recode --recode-INFO-all --out variants_maf3_miss7_noHighCov
+	## After filtering, kept 190 out of 190 Individuals
+	## After filtering, kept 32596 out of a possible 33360 Sites
+```
+
+
+
+### create mpgl file
+
+```{bash}
+perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl variants_maf3_miss7_noHighCov.recode.vcf
+```
+
+
+
+### calculate coverage
+
+```{bash}
+sbatch slurm_bh2tree_calc_cov.sh
+```
+
+IN R
+```{bash}
+module load arcc/1.0 gcc/14.2.0 r/4.4.0R
+j <- read.csv("variants_maf3_miss7_noHighCov.recode.vcf_coverage.csv", header=F)
+k <- j[,-1]
+mean_vect <- vector()
+for (i in 1:190) { mean_vect <- append(mean_vect, mean(as.numeric(k[i,]))) }
+mean(mean_vect)
+	## 
+```
+
+
+
+
+### generate pntest file
+
+```{bash}
+perl /home/jjahner/perl_scripts/gl2genestV1.3.pl variants_maf3_miss7_noHighCov.recode.mpgl mean
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+in R to make a transposed genotype matrix with individuals as rows and loci as columns
+
+module load arcc/1.0 gcc/12.2.0 r/4.2.2
+R
+
+read.table("pntest_mean_Fis_filtered.recode.txt", header=F)->gl
+read.table("sucker_ids_322.txt", header=T)->ids
+read.table("sucker_pops_322.txt", header=F)->pops
+
+t(gl)->tgl
+cbind(ids, pops, tgl)->tidsgl
+write.table(tidsgl, file="sucker_gl_matrix_322_11000.txt", sep=" ", row.names=F, col.names=F , quote=F)
 
 
 
