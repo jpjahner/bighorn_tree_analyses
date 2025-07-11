@@ -220,8 +220,7 @@ sbatch slurm_bh2tree_calc_cov.sh
 
 ### filter out over-assembled loci
 
-In R:
-```{bash}
+```{R}
 cut -d " " -f 1 variants_maf3_miss7.recode.mpgl > loc_names_33084.txt
 
 module load arcc/1.0 gcc/14.2.0 r/4.4.0
@@ -294,7 +293,6 @@ write.table(kill_locs, file="high_cov_loc_list_to_be_removed.txt", quote=F, row.
 quit()
 ```
 
-In terminal:
 ```{bash}
 sed "s/:/\t/" high_cov_loc_list_to_be_removed.txt > high_cov_loc_list_to_be_removed_tabdelim.txt
 
@@ -323,13 +321,14 @@ sbatch slurm_bh2tree_calc_cov.sh
 
 IN R
 ```{bash}
-module load arcc/1.0 gcc/14.2.0 r/4.4.0R
-j <- read.csv("variants_maf3_miss7_noHighCov.recode.vcf_coverage.csv", header=F)
+module load arcc/1.0 gcc/14.2.0 r/4.4.0
+R
+j <- read.csv("variants_maf3_miss7_noHighCov.recode.mpgl_coverage.csv", header=F)
 k <- j[,-1]
 mean_vect <- vector()
 for (i in 1:190) { mean_vect <- append(mean_vect, mean(as.numeric(k[i,]))) }
 mean(mean_vect)
-	## 
+	## 4.146418
 ```
 
 
@@ -342,34 +341,138 @@ perl /home/jjahner/perl_scripts/gl2genestV1.3.pl variants_maf3_miss7_noHighCov.r
 ```
 
 
+### make a transposed genotype matrix
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-in R to make a transposed genotype matrix with individuals as rows and loci as columns
-
-module load arcc/1.0 gcc/12.2.0 r/4.2.2
+```{bash}
+module load arcc/1.0 gcc/14.2.0 r/4.4.0
 R
 
-read.table("pntest_mean_Fis_filtered.recode.txt", header=F)->gl
-read.table("sucker_ids_322.txt", header=T)->ids
-read.table("sucker_pops_322.txt", header=F)->pops
+read.table("pntest_mean_variants_maf3_miss7_noHighCov.recode.txt", header=F)->gl
+read.table("bighorn_tree_10inds_190.txt", header=T)->ids
+read.table("bighorn_tree_10inds_pops_190.txt", header=F)->pops
 
 t(gl)->tgl
 cbind(ids, pops, tgl)->tidsgl
-write.table(tidsgl, file="sucker_gl_matrix_322_11000.txt", sep=" ", row.names=F, col.names=F , quote=F)
+write.table(tidsgl, file="bighorn_tree_gl_matrix_190_32320.txt", sep=" ", row.names=F, col.names=F , quote=F)
+```
+
+
+
+
+
+## entropy full
+
+### LDA for starting values
+
+```{R}
+module load arcc/1.0 gcc/14.2.0 r/4.4.0
+R
+
+g <- read.table("pntest_mean_variants_maf3_miss7_noHighCov.recode.txt", header=F)
+
+# dim(g)
+# 32320  190
+
+names <- read.table("bighorn_tree_10inds_190.txt", header=T)
+pops <- read.table("bighorn_tree_10inds_pops_190.txt", header=F)
+
+nind <- dim(g)[2]
+nloci <- dim(g)[1]
+
+## pca on the genotype matrix
+#pcg<-prcomp(x=t(g),center=TRUE,scale=FALSE)
+
+## OR calculate N x N genotype covariance matrix
+
+gmn<-apply(g,1,mean, na.rm=T)
+gmnmat<-matrix(gmn,nrow=nloci,ncol=nind)
+gprime<-g-gmnmat ## remove mean
+gcovarmat<-matrix(NA,nrow=nind,ncol=nind)
+for(i in 1:nind){
+    for(j in i:nind){
+        if (i==j){
+            gcovarmat[i,j]<-cov(gprime[,i],gprime[,j], use="pairwise.complete.obs")
+        }
+        else{
+            gcovarmat[i,j]<-cov(gprime[,i],gprime[,j], use="pairwise.complete.obs")
+            gcovarmat[j,i]<-gcovarmat[i,j]
+        }
+    }
+}
+
+
+## pca on the genotype covariance matrix
+pcgcov<-prcomp(x=gcovarmat,center=TRUE,scale=FALSE)
+pcgcov->pcg
+
+
+## LDA
+
+library(MASS)
+k1<-kmeans(pcg$x[,1:5],1,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k2<-kmeans(pcg$x[,1:5],2,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k3<-kmeans(pcg$x[,1:5],3,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k4<-kmeans(pcg$x[,1:5],4,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k5<-kmeans(pcg$x[,1:5],5,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k6<-kmeans(pcg$x[,1:5],6,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k7<-kmeans(pcg$x[,1:5],7,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k8<-kmeans(pcg$x[,1:5],8,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k9<-kmeans(pcg$x[,1:5],9,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k10<-kmeans(pcg$x[,1:5],10,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k11<-kmeans(pcg$x[,1:5],11,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k12<-kmeans(pcg$x[,1:5],12,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+
+ldak1<-lda(x=pcg$x[,1:5],grouping=k1$cluster,CV=TRUE)
+ldak2<-lda(x=pcg$x[,1:5],grouping=k2$cluster,CV=TRUE)
+ldak3<-lda(x=pcg$x[,1:5],grouping=k3$cluster,CV=TRUE)
+ldak4<-lda(x=pcg$x[,1:5],grouping=k4$cluster,CV=TRUE)
+ldak5<-lda(x=pcg$x[,1:5],grouping=k5$cluster,CV=TRUE)
+ldak6<-lda(x=pcg$x[,1:5],grouping=k6$cluster,CV=TRUE)
+ldak7<-lda(x=pcg$x[,1:5],grouping=k7$cluster,CV=TRUE)
+ldak8<-lda(x=pcg$x[,1:5],grouping=k8$cluster,CV=TRUE)
+ldak9<-lda(x=pcg$x[,1:5],grouping=k9$cluster,CV=TRUE)
+ldak10<-lda(x=pcg$x[,1:5],grouping=k10$cluster,CV=TRUE)
+ldak11<-lda(x=pcg$x[,1:5],grouping=k11$cluster,CV=TRUE)
+ldak12<-lda(x=pcg$x[,1:5],grouping=k12$cluster,CV=TRUE)
+
+
+write.table(round(ldak1$posterior,5),file="ldak1.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak2$posterior,5),file="ldak2.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak3$posterior,5),file="ldak3.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak4$posterior,5),file="ldak4.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak5$posterior,5),file="ldak5.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak6$posterior,5),file="ldak6.txt",quote=F,row.names=F,col.names=F)                                      
+write.table(round(ldak7$posterior,5),file="ldak7.txt",quote=F,row.names=F,col.names=F)                                      
+write.table(round(ldak8$posterior,5),file="ldak8.txt",quote=F,row.names=F,col.names=F)                                      
+write.table(round(ldak9$posterior,5),file="ldak9.txt",quote=F,row.names=F,col.names=F)                                      
+write.table(round(ldak10$posterior,5),file="ldak10.txt",quote=F,row.names=F,col.names=F)                                      
+write.table(round(ldak11$posterior,5),file="ldak11.txt",quote=F,row.names=F,col.names=F)                                      
+write.table(round(ldak12$posterior,5),file="ldak12.txt",quote=F,row.names=F,col.names=F)                                      
+                                 
+```
+
+
+
+### Making .mpgl files for entropy
+
+```{bash}
+grep "_" bighorn_tree_10inds_190.txt > bighorn_tree_10inds_190_nohead.txt
+
+perl /home/jjahner/perl_scripts/create_entropy_top_2rows.pl bighorn_tree_10inds_190_nohead.txt 
+
+cat entropy_2rows.txt ../variants_maf3_miss7_noHighCov.recode.mpgl > bighorn_tree_entropy.mpgl
+```
+
+NOTE: need to manually add to the top 190 32320 1 
+
+
+### launch
+
+```{bash}
+perl run_entropy.pl bighorn_tree_entropy.mpgl
+```
+
+
 
 
 
