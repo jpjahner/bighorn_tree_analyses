@@ -470,9 +470,21 @@ NOTE: need to manually add to the top 190 32320 1
 
 ```{bash}
 perl run_entropy.pl bighorn_tree_entropy.mpgl
+
+    ## slurm-16859220 - slurm-16859269
+    ## my $n_reps = 5;      ## number of replicate chains
+    ## my $max_k = 10;       ## maximum k you want to consider
+    ## my $ent_ploidy = 2;  ## proposed ploidy
+    ## my $ent_l = 100000;   ## length of chain
+    ## my $ent_b = 50000;    ## number of iterations to discard for burn-in
+    ## my $ent_t = 10;      ## thinning interval
+    ## my $ent_s = 20;      ## Dirichlet initialization scalar
+    ## my $ent_e = 0.01;    ## per-locus error rate
+    ## my $ent_m = 1;       ## input format (0 = read counts; 1 = genotype likelihoods)
+    ## my $ent_w = 1;       ## output includes allele frequencies? [0/1]
+    ## my $ent_D = 0;       ## dic or waic [0/1]
+    ## my @lazy_caterer = ('1','2','7','11','16','22','29','37','46','56'); ## seeding for replicates (-r)
 ```
-
-
 
 
 
