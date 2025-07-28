@@ -161,12 +161,12 @@ grep "Sites" first_filter_out/*
     ## first_filter_out/stdout_maf5_miss8:After filtering, kept 12978 out of a possible 745105 Sites
     ## first_filter_out/stdout_maf5_miss9:After filtering, kept 4697 out of a possible 745105 Sites
 ```
-Move forward with maf3 miss7
+Move forward with maf3 miss8
 
 
 ### create ids file
 ```{bash}
-vcftools --vcf variants_maf3_miss7.recode.vcf --missing-indv
+vcftools --vcf variants_maf3_miss8.recode.vcf --missing-indv
 
 cut -f 1 out.imiss > bighorn_tree_10inds_190.txt
 
@@ -207,8 +207,8 @@ sed 's/SN_LM/ML/g' > bighorn_tree_10inds_pops_190_renamed.txt
 ### generate mpgl
 
 ```{bash}
-perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl variants_maf3_miss7.recode.vcf
-    ## Number of loci: 33084; number of individuals 190
+perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl variants_maf3_miss8.recode.vcf
+    ## Number of loci: 16136; number of individuals 190
 ```
 
 ### calculate coverage
@@ -485,6 +485,149 @@ perl run_entropy.pl bighorn_tree_entropy.mpgl
     ## my $ent_D = 0;       ## dic or waic [0/1]
     ## my @lazy_caterer = ('1','2','7','11','16','22','29','37','46','56'); ## seeding for replicates (-r)
 ```
+
+
+### chain evaluation
+
+
+untar files
+
+```{bash}
+perl /project/evolgen/bin/unpack.pl *.tgz
+```
+
+
+
+extract original data from hdf5 on teton
+
+```{bash}
+module load swset/2018.05
+module load gcc/7.3.0
+module load gsl/2.5
+module load hdf5/1.8.19
+```
+
+
+
+mcmc
+
+```{bash}
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k2_rep*.hdf5 -p q -s 4 -o mcmc2_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k3_rep*.hdf5 -p q -s 4 -o mcmc3_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k4_rep*.hdf5 -p q -s 4 -o mcmc4_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k5_rep*.hdf5 -p q -s 4 -o mcmc5_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k6_rep*.hdf5 -p q -s 4 -o mcmc6_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k7_rep*.hdf5 -p q -s 4 -o mcmc7_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep*.hdf5 -p q -s 4 -o mcmc8_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k9_rep*.hdf5 -p q -s 4 -o mcmc9_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep*.hdf5 -p q -s 4 -o mcmc10_bighorn_tree.txt
+```
+
+
+
+dic
+
+```{bash}
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k1_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k1_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k1_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k1_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k1_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k2_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k2_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k2_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k2_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k2_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k3_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k3_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k3_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k3_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k3_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k4_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k4_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k4_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k4_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k4_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k5_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k5_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k5_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k5_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k5_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k6_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k6_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k6_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k6_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k6_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k7_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k7_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k7_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k7_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k7_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k9_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k9_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k9_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k9_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k9_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep5.hdf5 -s 3 -p deviance
+```{bash}
+
+
+
+
+q
+
+```{bash}
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k2_rep*.hdf5 -p q -s 0 -o q2_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k3_rep*.hdf5 -p q -s 0 -o q3_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k4_rep*.hdf5 -p q -s 0 -o q4_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k5_rep*.hdf5 -p q -s 0 -o q5_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k6_rep*.hdf5 -p q -s 0 -o q6_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k7_rep*.hdf5 -p q -s 0 -o q7_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep*.hdf5 -p q -s 0 -o q8_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k9_rep*.hdf5 -p q -s 0 -o q9_bighorn_tree.txt
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep*.hdf5 -p q -s 0 -o q10_bighorn_tree.txt
+```
+
+
+
+
+gprob
+
+```{bash}
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k3_rep*.hdf5  -p gprob -s 0 -o gprob3_bighorn_tree.txt
+```
+
+
 
 
 
