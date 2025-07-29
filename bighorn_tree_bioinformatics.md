@@ -220,13 +220,16 @@ sbatch slurm_bh2tree_calc_cov.sh
 
 ### filter out over-assembled loci
 
-```{R}
-cut -d " " -f 1 variants_maf3_miss7.recode.mpgl > loc_names_33084.txt
-
+```{bash}
+cut -d " " -f 1 variants_maf3_miss8.recode.mpgl > loc_names_16136.txt
 module load arcc/1.0 gcc/14.2.0 r/4.4.0
 R
+```
 
-dat <- read.csv("variants_maf3_miss7.recode.mpgl_coverage.csv", header=F)
+
+In R
+```{R}
+dat <- read.csv("variants_maf3_miss8.recode.mpgl_coverage.csv", header=F)
 	dim(dat)
 	dat[1:10,1:10]
 
@@ -234,57 +237,57 @@ dat_noname <- dat[,-1]
 	dim(dat_noname)
 	dat_noname[1:10,1:10]
 
-loc_names <- read.delim("loc_names_33084.txt", header=F)
+loc_names <- read.delim("loc_names_16136.txt", header=F)
 	head(loc_names)
 
-avg_33084 <- vector()
-in_out_33084_10 <- vector()
-in_out_33084_12 <- vector()
-in_out_33084_14 <- vector()
-in_out_33084_16 <- vector()
+avg_16136 <- vector()
+in_out_16136_10 <- vector()
+in_out_16136_12 <- vector()
+in_out_16136_14 <- vector()
+in_out_16136_16 <- vector()
 
-for (i in 1:33084)
+for (i in 1:16136)
 	{
 	avg <- mean(dat_noname[,i])
-	avg_33084 <- append(avg_33084, avg)
+	avg_16136 <- append(avg_16136, avg)
 	
-	if (avg <= 10)	{ in_out_33084_10 <- append(in_out_33084_10, 1) }
-	else			{ in_out_33084_10 <- append(in_out_33084_10, 0) }
+	if (avg <= 10)	{ in_out_16136_10 <- append(in_out_16136_10, 1) }
+	else			{ in_out_16136_10 <- append(in_out_16136_10, 0) }
 
-	if (avg <= 12)	{ in_out_33084_12 <- append(in_out_33084_12, 1) }
-	else			{ in_out_33084_12 <- append(in_out_33084_12, 0) }
+	if (avg <= 12)	{ in_out_16136_12 <- append(in_out_16136_12, 1) }
+	else			{ in_out_16136_12 <- append(in_out_16136_12, 0) }
 	
-	if (avg <= 14)	{ in_out_33084_14 <- append(in_out_33084_14, 1) }
-	else			{ in_out_33084_14 <- append(in_out_33084_14, 0) }
+	if (avg <= 14)	{ in_out_16136_14 <- append(in_out_16136_14, 1) }
+	else			{ in_out_16136_14 <- append(in_out_16136_14, 0) }
 	
-	if (avg <= 16)	{ in_out_33084_16 <- append(in_out_33084_16, 1) }
-	else			{ in_out_33084_16 <- append(in_out_33084_16, 0) }
+	if (avg <= 16)	{ in_out_16136_16 <- append(in_out_16136_16, 1) }
+	else			{ in_out_16136_16 <- append(in_out_16136_16, 0) }
 	
 	}
 
 
 
-sum(in_out_33084_10) / 33084
-	## 31172 (94.2%)
+sum(in_out_16136_10) / 16136
+	## 14328 (88.8%)
 
-sum(in_out_33084_12) / 33084
-	## 31920 (96.5%)
+sum(in_out_16136_12) / 16136
+	## 15069 (93.4%)
 	
-sum(in_out_33084_14) / 33084
-	## 32320 (97.7%)
+sum(in_out_16136_14) / 16136
+	## 15466 (95.8%)
 	
-sum(in_out_33084_16) / 33084
-	## 32523 (98.3%)
+sum(in_out_16136_16) / 16136
+	## 15665 (97.1%)
 
  choosing to kill all locs with mean cov/ind >= 14
 
 
 
-sub_14 <- dat_noname[,in_out_33084_14==1]
+sub_14 <- dat_noname[,in_out_16136_14==1]
 	dim(sub_14)
-sub_14_avg <- subset(avg_33084, in_out_33084_14==1)	
+sub_14_avg <- subset(avg_16136, in_out_16136_14==1)	
 
-kill_locs <- subset(loc_names, in_out_33084_14==0)
+kill_locs <- subset(loc_names, in_out_16136_14==0)
 	dim(kill_locs)
 	head(kill_locs)
 
@@ -298,9 +301,9 @@ sed "s/:/\t/" high_cov_loc_list_to_be_removed.txt > high_cov_loc_list_to_be_remo
 
 module load arcc/1.0 gcc/14.2.0 bcftools/1.20 vcftools/0.1.17
 
-vcftools --vcf variants_maf3_miss7.recode.vcf --exclude-positions high_cov_loc_list_to_be_removed_tabdelim.txt --recode --recode-INFO-all --out variants_maf3_miss7_noHighCov
+vcftools --vcf variants_maf3_miss8.recode.vcf --exclude-positions high_cov_loc_list_to_be_removed_tabdelim.txt --recode --recode-INFO-all --out variants_maf3_miss8_noHighCov
 	## After filtering, kept 190 out of 190 Individuals
-	## After filtering, kept 32596 out of a possible 33360 Sites
+	## After filtering, kept 15574 out of a possible 16244 Sites
 ```
 
 
@@ -308,7 +311,8 @@ vcftools --vcf variants_maf3_miss7.recode.vcf --exclude-positions high_cov_loc_l
 ### create mpgl file
 
 ```{bash}
-perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl variants_maf3_miss7_noHighCov.recode.vcf
+perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl variants_maf3_miss8_noHighCov.recode.vcf
+    ## Number of loci: 15466; number of individuals 190
 ```
 
 
@@ -323,12 +327,12 @@ IN R
 ```{bash}
 module load arcc/1.0 gcc/14.2.0 r/4.4.0
 R
-j <- read.csv("variants_maf3_miss7_noHighCov.recode.mpgl_coverage.csv", header=F)
+j <- read.csv("variants_maf3_miss8_noHighCov.recode.mpgl_coverage.csv", header=F)
 k <- j[,-1]
 mean_vect <- vector()
 for (i in 1:190) { mean_vect <- append(mean_vect, mean(as.numeric(k[i,]))) }
 mean(mean_vect)
-	## 4.146418
+	## 
 ```
 
 
@@ -337,7 +341,7 @@ mean(mean_vect)
 ### generate pntest file
 
 ```{bash}
-perl /home/jjahner/perl_scripts/gl2genestV1.3.pl variants_maf3_miss7_noHighCov.recode.mpgl mean
+perl /home/jjahner/perl_scripts/gl2genestV1.3.pl variants_maf3_miss8_noHighCov.recode.mpgl mean
 ```
 
 
@@ -347,13 +351,13 @@ perl /home/jjahner/perl_scripts/gl2genestV1.3.pl variants_maf3_miss7_noHighCov.r
 module load arcc/1.0 gcc/14.2.0 r/4.4.0
 R
 
-read.table("pntest_mean_variants_maf3_miss7_noHighCov.recode.txt", header=F)->gl
+read.table("pntest_mean_variants_maf3_miss8_noHighCov.recode.txt", header=F)->gl
 read.table("bighorn_tree_10inds_190.txt", header=T)->ids
 read.table("bighorn_tree_10inds_pops_190.txt", header=F)->pops
 
 t(gl)->tgl
 cbind(ids, pops, tgl)->tidsgl
-write.table(tidsgl, file="bighorn_tree_gl_matrix_190_32320.txt", sep=" ", row.names=F, col.names=F , quote=F)
+write.table(tidsgl, file="bighorn_tree_gl_matrix_190_15466.txt", sep=" ", row.names=F, col.names=F , quote=F)
 ```
 
 
@@ -368,10 +372,10 @@ write.table(tidsgl, file="bighorn_tree_gl_matrix_190_32320.txt", sep=" ", row.na
 module load arcc/1.0 gcc/14.2.0 r/4.4.0
 R
 
-g <- read.table("pntest_mean_variants_maf3_miss7_noHighCov.recode.txt", header=F)
+g <- read.table("pntest_mean_variants_maf3_miss8_noHighCov.recode.txt", header=F)
 
 # dim(g)
-# 32320  190
+# 15466  190
 
 names <- read.table("bighorn_tree_10inds_190.txt", header=T)
 pops <- read.table("bighorn_tree_10inds_pops_190.txt", header=F)
@@ -419,8 +423,7 @@ k7<-kmeans(pcg$x[,1:5],7,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
 k8<-kmeans(pcg$x[,1:5],8,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
 k9<-kmeans(pcg$x[,1:5],9,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
 k10<-kmeans(pcg$x[,1:5],10,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
-k11<-kmeans(pcg$x[,1:5],11,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
-k12<-kmeans(pcg$x[,1:5],12,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+
 
 ldak1<-lda(x=pcg$x[,1:5],grouping=k1$cluster,CV=TRUE)
 ldak2<-lda(x=pcg$x[,1:5],grouping=k2$cluster,CV=TRUE)
@@ -432,8 +435,6 @@ ldak7<-lda(x=pcg$x[,1:5],grouping=k7$cluster,CV=TRUE)
 ldak8<-lda(x=pcg$x[,1:5],grouping=k8$cluster,CV=TRUE)
 ldak9<-lda(x=pcg$x[,1:5],grouping=k9$cluster,CV=TRUE)
 ldak10<-lda(x=pcg$x[,1:5],grouping=k10$cluster,CV=TRUE)
-ldak11<-lda(x=pcg$x[,1:5],grouping=k11$cluster,CV=TRUE)
-ldak12<-lda(x=pcg$x[,1:5],grouping=k12$cluster,CV=TRUE)
 
 
 write.table(round(ldak1$posterior,5),file="ldak1.txt",quote=F,row.names=F,col.names=F)
@@ -445,10 +446,7 @@ write.table(round(ldak6$posterior,5),file="ldak6.txt",quote=F,row.names=F,col.na
 write.table(round(ldak7$posterior,5),file="ldak7.txt",quote=F,row.names=F,col.names=F)                                      
 write.table(round(ldak8$posterior,5),file="ldak8.txt",quote=F,row.names=F,col.names=F)                                      
 write.table(round(ldak9$posterior,5),file="ldak9.txt",quote=F,row.names=F,col.names=F)                                      
-write.table(round(ldak10$posterior,5),file="ldak10.txt",quote=F,row.names=F,col.names=F)                                      
-write.table(round(ldak11$posterior,5),file="ldak11.txt",quote=F,row.names=F,col.names=F)                                      
-write.table(round(ldak12$posterior,5),file="ldak12.txt",quote=F,row.names=F,col.names=F)                                      
-                                 
+write.table(round(ldak10$posterior,5),file="ldak10.txt",quote=F,row.names=F,col.names=F)                                                      
 ```
 
 
@@ -460,10 +458,10 @@ grep "_" bighorn_tree_10inds_190.txt > bighorn_tree_10inds_190_nohead.txt
 
 perl /home/jjahner/perl_scripts/create_entropy_top_2rows.pl bighorn_tree_10inds_190_nohead.txt 
 
-cat entropy_2rows.txt ../variants_maf3_miss7_noHighCov.recode.mpgl > bighorn_tree_entropy.mpgl
+cat entropy_2rows.txt ../variants_maf3_miss8_noHighCov.recode.mpgl > bighorn_tree_entropy.mpgl
 ```
 
-NOTE: need to manually add to the top 190 32320 1 
+NOTE: need to manually add to the top 190 15466 1 
 
 
 ### launch
@@ -471,7 +469,7 @@ NOTE: need to manually add to the top 190 32320 1
 ```{bash}
 perl run_entropy.pl bighorn_tree_entropy.mpgl
 
-    ## slurm-16859220 - slurm-16859269
+    ## slurm-20950720 - slurm-20950769
     ## my $n_reps = 5;      ## number of replicate chains
     ## my $max_k = 10;       ## maximum k you want to consider
     ## my $ent_ploidy = 2;  ## proposed ploidy
