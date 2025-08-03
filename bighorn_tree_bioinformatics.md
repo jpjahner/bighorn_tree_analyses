@@ -484,6 +484,8 @@ perl run_entropy.pl bighorn_tree_entropy.mpgl
     ## my @lazy_caterer = ('1','2','7','11','16','22','29','37','46','56'); ## seeding for replicates (-r)
 ```
 
+NOTE: two of the k=8 chains did not converge, so launched additional chains to replace them
+
 
 ### chain evaluation
 
@@ -496,13 +498,10 @@ perl /project/evolgen/bin/unpack.pl *.tgz
 
 
 
-extract original data from hdf5 on teton
+extract original data from hdf5
 
 ```{bash}
-module load swset/2018.05
-module load gcc/7.3.0
-module load gsl/2.5
-module load hdf5/1.8.19
+module load arcc/1.0 gcc/14.2.0 openmpi/5.0.5 hdf5/1.14.3__hl_True__fortran_False-ompi
 ```
 
 
@@ -585,19 +584,7 @@ dic
 /project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep3.hdf5 -s 3 -p deviance
 /project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep4.hdf5 -s 3 -p deviance
 /project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k10_rep5.hdf5 -s 3 -p deviance
-
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep1.hdf5 -s 3 -p deviance
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep2.hdf5 -s 3 -p deviance
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep3.hdf5 -s 3 -p deviance
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep4.hdf5 -s 3 -p deviance
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k11_rep5.hdf5 -s 3 -p deviance
-
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep1.hdf5 -s 3 -p deviance
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep2.hdf5 -s 3 -p deviance
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep3.hdf5 -s 3 -p deviance
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep4.hdf5 -s 3 -p deviance
-/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k12_rep5.hdf5 -s 3 -p deviance
-```{bash}
+```
 
 
 
