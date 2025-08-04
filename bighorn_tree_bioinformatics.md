@@ -332,7 +332,7 @@ k <- j[,-1]
 mean_vect <- vector()
 for (i in 1:190) { mean_vect <- append(mean_vect, mean(as.numeric(k[i,]))) }
 mean(mean_vect)
-	## 
+	## 5.490218
 ```
 
 
@@ -614,9 +614,110 @@ gprob
 
 
 
+## entropy cali sub
+
+### Subset vcf from above
+```{bash}
+grep "CB" bighorn_tree_10inds_190_nohead.txt > cali_sub_60.txt
+cut -f 1,2 -d "_" cali_sub_60.txt > cali_sub_60_pops.txt
+
+module load arcc/1.0 gcc/14.2.0 samtools/1.20 bcftools/1.20  vcftools/0.1.17
+vcftools --vcf variants_maf3_miss8_noHighCov.recode.vcf --keep cali_sub_60.txt --recode --recode-INFO-all --out cali_sub
+    ## After filtering, kept 60 out of 190 Individuals
+    ## After filtering, kept 15574 out of a possible 15574 Sites
+```
+
+### create mpgl
+```{bash}
+perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl cali_sub.recode.vcf
+```
+
+### generate pntest
+```{bash}
+perl /home/jjahner/perl_scripts/gl2genestV1.3.pl cali_sub.recode.mpgl mean
+```
+
+### generate ldaks
+```{R}
+module load arcc/1.0 gcc/14.2.0 r/4.4.0
+R
+
+# LDA for starting values
+g <- read.table("pntest_mean_cali_sub.recode.txt", header=F)
+
+# dim(g)
+# 15466  60
+
+names <- read.table("cali_sub_60.txt", header=F)
+pops <- read.table("cali_sub_60_pops.txt", header=F)
+nind <- dim(g)[2]
+nloci <- dim(g)[1]
+gmn<-apply(g,1,mean, na.rm=T)
+gmnmat<-matrix(gmn,nrow=nloci,ncol=nind)
+gprime<-g-gmnmat ## remove mean
+gcovarmat<-matrix(NA,nrow=nind,ncol=nind)
+for(i in 1:nind){
+    for(j in i:nind){
+        if (i==j){
+            gcovarmat[i,j]<-cov(gprime[,i],gprime[,j], use="pairwise.complete.obs")
+        }
+        else{
+            gcovarmat[i,j]<-cov(gprime[,i],gprime[,j], use="pairwise.complete.obs")
+            gcovarmat[j,i]<-gcovarmat[i,j]
+        }
+    }
+}
+pcgcov<-prcomp(x=gcovarmat,center=TRUE,scale=FALSE)
+pcgcov->pcg
+
+library(MASS)
+k1<-kmeans(pcg$x[,1:5],1,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k2<-kmeans(pcg$x[,1:5],2,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k3<-kmeans(pcg$x[,1:5],3,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k4<-kmeans(pcg$x[,1:5],4,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k5<-kmeans(pcg$x[,1:5],5,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+
+ldak1<-lda(x=pcg$x[,1:5],grouping=k1$cluster,CV=TRUE)
+ldak2<-lda(x=pcg$x[,1:5],grouping=k2$cluster,CV=TRUE)
+ldak3<-lda(x=pcg$x[,1:5],grouping=k3$cluster,CV=TRUE)
+ldak4<-lda(x=pcg$x[,1:5],grouping=k4$cluster,CV=TRUE)
+ldak5<-lda(x=pcg$x[,1:5],grouping=k5$cluster,CV=TRUE)
+
+write.table(round(ldak1$posterior,5),file="ldak1.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak2$posterior,5),file="ldak2.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak3$posterior,5),file="ldak3.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak4$posterior,5),file="ldak4.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak5$posterior,5),file="ldak5.txt",quote=F,row.names=F,col.names=F)
+```
+
+
+### Making .mpgl files for entropy
+```{bash}
+perl /home/jjahner/perl_scripts/create_entropy_top_2rows.pl cali_sub_60.txt 
+cat entropy_2rows.txt ../../cali_sub.recode.mpgl > cali_sub_entropy.mpgl
+```
+need to add to the top 60 15466 1 
 
 
 
+### launch
+```{bash}
+perl run_entropy.pl cali_sub_entropy.mpgl
+
+## trial 0 (K1-K5 slurm: 22089823 - 22089847)
+	## my $n_reps = 5;      ## number of replicate chains
+	## my $max_k = 5;       ## maximum k you want to consider
+	## my $ent_ploidy = 2;  ## proposed ploidy
+	## my $ent_l = 100000;   ## length of chain
+	## my $ent_b = 50000;    ## number of iterations to discard for burn-in
+	## my $ent_t = 10;      ## thinning interval
+	## my $ent_s = 20;      ## Dirichlet initialization scalar
+	## my $ent_e = 0.01;    ## per-locus error rate
+	## my $ent_m = 1;       ## input format (0 = read counts; 1 = genotype likelihoods)
+	## my $ent_w = 1;       ## output includes allele frequencies? [0/1]
+	## my $ent_D = 0;       ## dic or waic [0/1]
+	## my @lazy_caterer = ('1','2','7','11','16','22','29','37','46','56'); ## seeding for replicates (-r)
+```
 
 
 
