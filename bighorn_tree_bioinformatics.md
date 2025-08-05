@@ -721,6 +721,431 @@ perl run_entropy.pl cali_sub_entropy.mpgl
 
 
 
+### chain evaluation
 
+untar files
+
+```{bash}
+perl /project/evolgen/bin/unpack.pl *.tgz
+```
+
+extract original data from hdf5
+
+```{bash}
+module load arcc/1.0 gcc/14.2.0 openmpi/5.0.5 hdf5/1.14.3__hl_True__fortran_False-ompi
+```
+
+
+mcmc
+
+```{bash}
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k2_rep*.hdf5 -p q -s 4 -o mcmc2_cali_sub.txt
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k3_rep*.hdf5 -p q -s 4 -o mcmc3_cali_sub.txt
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k4_rep*.hdf5 -p q -s 4 -o mcmc4_cali_sub.txt
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k5_rep*.hdf5 -p q -s 4 -o mcmc5_cali_sub.txt
+```
+
+dic
+
+```{bash}
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k1_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k1_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k1_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k1_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k1_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k2_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k2_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k2_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k2_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k2_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k3_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k3_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k3_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k3_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k3_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k4_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k4_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k4_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k4_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k4_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k5_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k5_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k5_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k5_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k5_rep5.hdf5 -s 3 -p deviance
+```
+
+
+q
+
+```{bash}
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k2_rep*.hdf5 -p q -s 0 -o q2_cali_sub.txt
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k3_rep*.hdf5 -p q -s 0 -o q3_cali_sub.txt
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k4_rep*.hdf5 -p q -s 0 -o q4_cali_sub.txt
+/project/evolgen/bin/estpost.entropy cali_sub_entropy.mpgl_k5_rep*.hdf5 -p q -s 0 -o q5_cali_sub.txt
+```
+
+
+
+
+
+
+
+
+## desert sub
+
+### subset vcf from above
+```{bash}
+grep "DB\|MB\|PB\|SN" bighorn_tree_10inds_190_nohead.txt > desert_sub_55.txt
+cut -f 1,2 -d "_" desert_sub_55.txt > desert_sub_55_pops.txt
+
+module load arcc/1.0 gcc/14.2.0 samtools/1.20 bcftools/1.20  vcftools/0.1.17
+vcftools --vcf variants_maf3_miss8_noHighCov.recode.vcf --keep desert_sub_55.txt --recode --recode-INFO-all --out desert_sub
+    ## After filtering, kept 55 out of 190 Individuals
+    ## After filtering, kept 15574 out of a possible 15574 Sites
+```
+
+### create mpgl
+```{bash}
+perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl desert_sub.recode.vcf
+```
+
+### generate pntest
+```{bash}
+perl /home/jjahner/perl_scripts/gl2genestV1.3.pl desert_sub.recode.mpgl mean
+```
+
+
+### generate ldaks
+```{R}
+module load arcc/1.0 gcc/14.2.0 r/4.4.0
+R
+
+# LDA for starting values
+g <- read.table("pntest_mean_desert_sub.recode.txt", header=F)
+
+# dim(g)
+# 15466  55
+
+names <- read.table("desert_sub_55.txt", header=F)
+pops <- read.table("desert_sub_55_pops.txt", header=F)
+nind <- dim(g)[2]
+nloci <- dim(g)[1]
+gmn<-apply(g,1,mean, na.rm=T)
+gmnmat<-matrix(gmn,nrow=nloci,ncol=nind)
+gprime<-g-gmnmat ## remove mean
+gcovarmat<-matrix(NA,nrow=nind,ncol=nind)
+for(i in 1:nind){
+    for(j in i:nind){
+        if (i==j){
+            gcovarmat[i,j]<-cov(gprime[,i],gprime[,j], use="pairwise.complete.obs")
+        }
+        else{
+            gcovarmat[i,j]<-cov(gprime[,i],gprime[,j], use="pairwise.complete.obs")
+            gcovarmat[j,i]<-gcovarmat[i,j]
+        }
+    }
+}
+pcgcov<-prcomp(x=gcovarmat,center=TRUE,scale=FALSE)
+pcgcov->pcg
+
+library(MASS)
+k1<-kmeans(pcg$x[,1:5],1,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k2<-kmeans(pcg$x[,1:5],2,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k3<-kmeans(pcg$x[,1:5],3,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k4<-kmeans(pcg$x[,1:5],4,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k5<-kmeans(pcg$x[,1:5],5,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+
+ldak1<-lda(x=pcg$x[,1:5],grouping=k1$cluster,CV=TRUE)
+ldak2<-lda(x=pcg$x[,1:5],grouping=k2$cluster,CV=TRUE)
+ldak3<-lda(x=pcg$x[,1:5],grouping=k3$cluster,CV=TRUE)
+ldak4<-lda(x=pcg$x[,1:5],grouping=k4$cluster,CV=TRUE)
+ldak5<-lda(x=pcg$x[,1:5],grouping=k5$cluster,CV=TRUE)
+
+write.table(round(ldak1$posterior,5),file="ldak1.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak2$posterior,5),file="ldak2.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak3$posterior,5),file="ldak3.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak4$posterior,5),file="ldak4.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak5$posterior,5),file="ldak5.txt",quote=F,row.names=F,col.names=F)
+```
+
+
+### Making .mpgl files for entropy
+```{bash}
+perl /home/jjahner/perl_scripts/create_entropy_top_2rows.pl desert_sub_55.txt 
+cat entropy_2rows.txt ../../desert_sub.recode.mpgl > desert_sub_entropy.mpgl
+```
+need to add to the top 55 15466 1 
+
+
+### launch
+```{bash}
+perl run_entropy.pl desert_sub_entropy.mpgl
+
+## trial 0 (K1-K5 slurm: 22582103 - 22582140)
+	## my $n_reps = 5;      ## number of replicate chains
+	## my $max_k = 5;       ## maximum k you want to consider
+	## my $ent_ploidy = 2;  ## proposed ploidy
+	## my $ent_l = 100000;   ## length of chain
+	## my $ent_b = 50000;    ## number of iterations to discard for burn-in
+	## my $ent_t = 10;      ## thinning interval
+	## my $ent_s = 20;      ## Dirichlet initialization scalar
+	## my $ent_e = 0.01;    ## per-locus error rate
+	## my $ent_m = 1;       ## input format (0 = read counts; 1 = genotype likelihoods)
+	## my $ent_w = 1;       ## output includes allele frequencies? [0/1]
+	## my $ent_D = 0;       ## dic or waic [0/1]
+	## my @lazy_caterer = ('1','2','7','11','16','22','29','37','46','56'); ## seeding for replicates (-r)
+```
+
+
+
+### chain evaluation
+
+untar files
+
+```{bash}
+perl /project/evolgen/bin/unpack.pl *.tgz
+```
+
+extract original data from hdf5
+
+```{bash}
+module load arcc/1.0 gcc/14.2.0 openmpi/5.0.5 hdf5/1.14.3__hl_True__fortran_False-ompi
+```
+
+
+mcmc
+
+```{bash}
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k2_rep*.hdf5 -p q -s 4 -o mcmc2_desert_sub.txt
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k3_rep*.hdf5 -p q -s 4 -o mcmc3_desert_sub.txt
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k4_rep*.hdf5 -p q -s 4 -o mcmc4_desert_sub.txt
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k5_rep*.hdf5 -p q -s 4 -o mcmc5_desert_sub.txt
+```
+
+dic
+
+```{bash}
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k1_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k1_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k1_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k1_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k1_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k2_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k2_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k2_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k2_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k2_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k3_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k3_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k3_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k3_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k3_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k4_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k4_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k4_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k4_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k4_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k5_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k5_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k5_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k5_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k5_rep5.hdf5 -s 3 -p deviance
+```
+
+
+q
+
+```{bash}
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k2_rep*.hdf5 -p q -s 0 -o q2_desert_sub.txt
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k3_rep*.hdf5 -p q -s 0 -o q3_desert_sub.txt
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k4_rep*.hdf5 -p q -s 0 -o q4_desert_sub.txt
+/project/evolgen/bin/estpost.entropy desert_sub_entropy.mpgl_k5_rep*.hdf5 -p q -s 0 -o q5_desert_sub.txt
+```
+
+
+
+## rocky sub
+
+
+### Subset vcf from above
+```{bash}
+grep "RB" bighorn_tree_10inds_190_nohead.txt > rocky_sub_75.txt
+cut -f 1,2 -d "_" rocky_sub_75.txt > rocky_sub_75_pops.txt
+
+module load arcc/1.0 gcc/14.2.0 samtools/1.20 bcftools/1.20 vcftools/0.1.17
+vcftools --vcf variants_maf3_miss8_noHighCov.recode.vcf --keep rocky_sub_75.txt --recode --recode-INFO-all --out rocky_sub
+    ## After filtering, kept 75 out of 190 Individuals
+    ## After filtering, kept 15574 out of a possible 15574 Sites
+```
+
+### create mpgl
+```{bash}
+perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl rocky_sub.recode.vcf
+```
+
+### generate pntest
+```{bash}
+perl /home/jjahner/perl_scripts/gl2genestV1.3.pl rocky_sub.recode.mpgl mean
+```
+
+### generate ldaks
+```{R}
+module load arcc/1.0 gcc/14.2.0 r/4.4.0
+R
+
+# LDA for starting values
+g <- read.table("pntest_mean_rocky_sub.recode.txt", header=F)
+
+# dim(g)
+# 15466  75
+
+names <- read.table("rocky_sub_75.txt", header=F)
+pops <- read.table("rocky_sub_75_pops.txt", header=F)
+nind <- dim(g)[2]
+nloci <- dim(g)[1]
+gmn<-apply(g,1,mean, na.rm=T)
+gmnmat<-matrix(gmn,nrow=nloci,ncol=nind)
+gprime<-g-gmnmat ## remove mean
+gcovarmat<-matrix(NA,nrow=nind,ncol=nind)
+for(i in 1:nind){
+    for(j in i:nind){
+        if (i==j){
+            gcovarmat[i,j]<-cov(gprime[,i],gprime[,j], use="pairwise.complete.obs")
+        }
+        else{
+            gcovarmat[i,j]<-cov(gprime[,i],gprime[,j], use="pairwise.complete.obs")
+            gcovarmat[j,i]<-gcovarmat[i,j]
+        }
+    }
+}
+pcgcov<-prcomp(x=gcovarmat,center=TRUE,scale=FALSE)
+pcgcov->pcg
+
+library(MASS)
+k1<-kmeans(pcg$x[,1:5],1,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k2<-kmeans(pcg$x[,1:5],2,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k3<-kmeans(pcg$x[,1:5],3,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k4<-kmeans(pcg$x[,1:5],4,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+k5<-kmeans(pcg$x[,1:5],5,iter.max=10,nstart=10,algorithm="Hartigan-Wong")
+
+ldak1<-lda(x=pcg$x[,1:5],grouping=k1$cluster,CV=TRUE)
+ldak2<-lda(x=pcg$x[,1:5],grouping=k2$cluster,CV=TRUE)
+ldak3<-lda(x=pcg$x[,1:5],grouping=k3$cluster,CV=TRUE)
+ldak4<-lda(x=pcg$x[,1:5],grouping=k4$cluster,CV=TRUE)
+ldak5<-lda(x=pcg$x[,1:5],grouping=k5$cluster,CV=TRUE)
+
+write.table(round(ldak1$posterior,5),file="ldak1.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak2$posterior,5),file="ldak2.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak3$posterior,5),file="ldak3.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak4$posterior,5),file="ldak4.txt",quote=F,row.names=F,col.names=F)
+write.table(round(ldak5$posterior,5),file="ldak5.txt",quote=F,row.names=F,col.names=F)
+```
+
+
+### Making .mpgl files for entropy
+```{bash}
+perl /home/jjahner/perl_scripts/create_entropy_top_2rows.pl rocky_sub_75.txt 
+cat entropy_2rows.txt ../../rocky_sub.recode.mpgl > rocky_sub_entropy.mpgl
+```
+need to add to the top 75 15466 1 
+
+
+### launch
+```{bash}
+perl run_entropy.pl rocky_sub_entropy.mpgl
+
+## trial 0 (K1-K5 slurm: 22593928 - 22593964)
+	## my $n_reps = 5;      ## number of replicate chains
+	## my $max_k = 5;       ## maximum k you want to consider
+	## my $ent_ploidy = 2;  ## proposed ploidy
+	## my $ent_l = 100000;   ## length of chain
+	## my $ent_b = 50000;    ## number of iterations to discard for burn-in
+	## my $ent_t = 10;      ## thinning interval
+	## my $ent_s = 20;      ## Dirichlet initialization scalar
+	## my $ent_e = 0.01;    ## per-locus error rate
+	## my $ent_m = 1;       ## input format (0 = read counts; 1 = genotype likelihoods)
+	## my $ent_w = 1;       ## output includes allele frequencies? [0/1]
+	## my $ent_D = 0;       ## dic or waic [0/1]
+	## my @lazy_caterer = ('1','2','7','11','16','22','29','37','46','56'); ## seeding for replicates (-r)
+
+```
+
+
+### chain evaluation
+
+untar files
+
+```{bash}
+perl /project/evolgen/bin/unpack.pl *.tgz
+```
+
+extract original data from hdf5
+
+```{bash}
+module load arcc/1.0 gcc/14.2.0 openmpi/5.0.5 hdf5/1.14.3__hl_True__fortran_False-ompi
+```
+
+
+mcmc
+
+```{bash}
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k2_rep*.hdf5 -p q -s 4 -o mcmc2_rocky_sub.txt
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k3_rep*.hdf5 -p q -s 4 -o mcmc3_rocky_sub.txt
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k4_rep*.hdf5 -p q -s 4 -o mcmc4_rocky_sub.txt
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k5_rep*.hdf5 -p q -s 4 -o mcmc5_rocky_sub.txt
+```
+
+dic
+
+```{bash}
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k1_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k1_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k1_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k1_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k1_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k2_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k2_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k2_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k2_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k2_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k3_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k3_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k3_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k3_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k3_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k4_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k4_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k4_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k4_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k4_rep5.hdf5 -s 3 -p deviance
+
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k5_rep1.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k5_rep2.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k5_rep3.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k5_rep4.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k5_rep5.hdf5 -s 3 -p deviance
+```
+
+
+q
+
+```{bash}
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k2_rep*.hdf5 -p q -s 0 -o q2_rocky_sub.txt
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k3_rep*.hdf5 -p q -s 0 -o q3_rocky_sub.txt
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k4_rep*.hdf5 -p q -s 0 -o q4_rocky_sub.txt
+/project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k5_rep*.hdf5 -p q -s 0 -o q5_rocky_sub.txt
+```
 
 
