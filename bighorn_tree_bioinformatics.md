@@ -572,6 +572,11 @@ dic
 /project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep3.hdf5 -s 3 -p deviance
 /project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep4.hdf5 -s 3 -p deviance
 /project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep5.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep6.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep7.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep8.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep9.hdf5 -s 3 -p deviance
+/project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k8_rep10.hdf5 -s 3 -p deviance
 
 /project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k9_rep1.hdf5 -s 3 -p deviance
 /project/evolgen/bin/estpost.entropy bighorn_tree_entropy.mpgl_k9_rep2.hdf5 -s 3 -p deviance
