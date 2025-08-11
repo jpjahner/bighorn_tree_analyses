@@ -106,7 +106,7 @@ ls *.sorted.bam > bam_list.txt
 ## calling variants
 
 ```{bash}
-sbatch slurm_variants.sh
+sbatch slurm_bh2tree_variants.sh
 ```
 
 
@@ -1152,5 +1152,22 @@ q
 /project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k4_rep*.hdf5 -p q -s 0 -o q4_rocky_sub.txt
 /project/evolgen/bin/estpost.entropy rocky_sub_entropy.mpgl_k5_rep*.hdf5 -p q -s 0 -o q5_rocky_sub.txt
 ```
+
+
+
+## phylo subset
+
+2 individuals per population, plus the stone sheep outgroup
+
+### call variants
+
+Based on the individuals in bam_list_2inds.txt
+```{bash}
+sbatch slurm_bh2tree_variants.sh
+```
+
+
+
+
 
 
