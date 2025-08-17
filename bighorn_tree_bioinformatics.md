@@ -1166,7 +1166,222 @@ Based on the individuals in bam_list_2inds.txt
 sbatch slurm_bh2tree_variants.sh
 ```
 
+### filtering
 
+Number of loci in vcf
+```{bash}
+grep "^scaffold" -c variants_rawfiltered_2inds_10aug25.vcf
+    ## 380721
+```
+
+Making id file for reheadering:
+```{bash}
+sed -s "s/aln_//" bam_list_2inds.txt | sed -s "s/.sorted.bam//" > two_inds_ids_col.txt
+```
+
+Reheader
+```{bash}
+module load arcc/1.0 gcc/14.2.0 bcftools/1.20 vcftools/0.1.17
+bcftools reheader -s two_inds_ids_col.txt variants_rawfiltered_2inds_10aug25.vcf -o rehead_variants_rawfiltered_2inds_10aug25.vcf
+```
+
+First filter investigation
+```{bash}
+perl run_first_filter.pl rehead_variants_rawfiltered_2inds_10aug25.vcf
+
+grep "Sites" first_filter_out/*
+    ## first_filter_out/stdout_maf1_miss6:After filtering, kept 113315 out of a possible 380721 Sites
+    ## first_filter_out/stdout_maf1_miss7:After filtering, kept 84275 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf1_miss8:After filtering, kept 52095 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf1_miss9:After filtering, kept 24789 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf2_miss6:After filtering, kept 75922 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf2_miss7:After filtering, kept 53492 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf2_miss8:After filtering, kept 31995 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf2_miss9:After filtering, kept 14655 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf3_miss6:After filtering, kept 69384 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf3_miss7:After filtering, kept 48918 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf3_miss8:After filtering, kept 27366 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf3_miss9:After filtering, kept 12195 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf4_miss6:After filtering, kept 59750 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf4_miss7:After filtering, kept 42455 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf4_miss8:After filtering, kept 25217 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf4_miss9:After filtering, kept 10989 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf5_miss6:After filtering, kept 54669 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf5_miss7:After filtering, kept 38428 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf5_miss8:After filtering, kept 22503 out of a possible 380721Sites
+    ## first_filter_out/stdout_maf5_miss9:After filtering, kept 10353 out of a possible 380721Sites
+
+
+## move forward with maf3_miss7
+```
+
+
+
+Create ids file
+```{bash}
+vcftools --vcf variants_maf3_miss7.recode.vcf --missing-indv
+cut -f 1 out.imiss > two_inds_ids_41.txt
+sed "s/INDV/ind/" two_inds_ids_41.txt > two_inds_ids_41_good_head.txt
+grep -v "ind" two_inds_ids_41_good_head.txt | cut -f 1,2 -d "_" > two_inds_pops_41.txt
+```
+
+Generate mpgl
+```{bash}
+perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl variants_maf3_miss7.recode.vcf
+    ## Number of loci: 48482; number of individuals 41
+```
+
+Calculate coverage
+```{bash}
+sbatch slurm_calc_cov.sh
+```
+
+
+Filter out over-assembled loci
+
+```{bash}
+cut -d " " -f 1 variants_maf3_miss7.recode.mpgl > loc_names_48482.txt
+module load arcc/1.0 gcc/14.2.0 r/4.4.0
+```
+
+
+```{R}
+dat <- read.csv("variants_maf3_miss7.recode.mpgl_coverage.csv", header=F)
+	dim(dat)
+	dat[1:10,1:10]
+
+dat_noname <- dat[,-1]
+	dim(dat_noname)
+	dat_noname[1:10,1:10]
+
+loc_names <- read.delim("loc_names_48482.txt", header=F)
+	head(loc_names)
+
+avg_48482 <- vector()
+in_out_48482_10 <- vector()
+in_out_48482_12 <- vector()
+in_out_48482_14 <- vector()
+in_out_48482_16 <- vector()
+
+for (i in 1:48482)
+	{
+	avg <- mean(dat_noname[,i])
+	avg_48482 <- append(avg_48482, avg)
+	
+	if (avg <= 10)	{ in_out_48482_10 <- append(in_out_48482_10, 1) }
+	else			{ in_out_48482_10 <- append(in_out_48482_10, 0) }
+
+	if (avg <= 12)	{ in_out_48482_12 <- append(in_out_48482_12, 1) }
+	else			{ in_out_48482_12 <- append(in_out_48482_12, 0) }
+	
+	if (avg <= 14)	{ in_out_48482_14 <- append(in_out_48482_14, 1) }
+	else			{ in_out_48482_14 <- append(in_out_48482_14, 0) }
+	
+	if (avg <= 16)	{ in_out_48482_16 <- append(in_out_48482_16, 1) }
+	else			{ in_out_48482_16 <- append(in_out_48482_16, 0) }
+	
+	}
+
+
+sum(in_out_48482_10) / 48482
+	## 45790 (94.4%)
+
+sum(in_out_48482_12) / 48482
+	## 46797 (96.5%)
+	
+sum(in_out_48482_14) / 48482
+	## 47371 (97.7%)
+	
+sum(in_out_48482_16) / 48482
+	## 47692 (98.4%)
+
+
+##choosing to kill all locs with mean cov/ind >= 14 (as above)
+
+
+sub_14 <- dat_noname[,in_out_48482_14==1]
+	dim(sub_14)
+sub_14_avg <- subset(avg_48482, in_out_48482_14==1)	
+
+kill_locs <- subset(loc_names, in_out_48482_14==0)
+	dim(kill_locs)
+	head(kill_locs)
+
+write.table(kill_locs, file="high_cov_loc_list_to_be_removed.txt", quote=F, row.names=F, col.names=F)
+```
+
+
+Filter out loci
+```{bash}
+sed "s/:/\t/" high_cov_loc_list_to_be_removed.txt > high_cov_loc_list_to_be_removed_tabdelim.txt
+
+module load arcc/1.0 gcc/14.2.0 vcftools/0.1.17
+vcftools --vcf variants_maf3_miss7.recode.vcf --exclude-positions high_cov_loc_list_to_be_removed_tabdelim.txt --recode --recode-INFO-all --out variants_maf3_miss7_noHighCov
+    ## After filtering, kept 41 out of 41 Individuals
+    ## After filtering, kept 47807 out of a possible 48918 Sites
+```
+
+
+Create mpgl
+```{bash}
+perl /home/jjahner/perl_scripts/vcf2mpglV1.3TLP.pl variants_maf3_miss7_noHighCov.recode.vcf
+    ## Number of loci: 47371; number of individuals 41
+```
+
+
+Calculate coverage
+```{bash}
+sbatch slurm_calc_cov.sh
+
+## IN R
+module load arcc/1.0 gcc/14.2.0 r/4.4.0
+R
+j <- read.csv("variants_maf3_miss7_noHighCov.recode.mpgl_coverage.csv", header=F)
+k <- j[,-1]
+mean_vect <- vector()
+for (i in 1:41) { mean_vect <- append(mean_vect, mean(as.numeric(k[i,]))) }
+mean(mean_vect)
+	## 3.939781
+```
+
+
+### iqtree
+
+Convert vcf to phylip
+```{bash}
+git clone https://github.com/edgardomortiz/vcf2phylip.git
+
+module load arcc/1.0 gcc/14.2.0 python/3.10.6
+python3 /home/jjahner/python_scripts/vcf2phylip/vcf2phylip.py -i /project/evolgen/jjahner/bh2tree/sam_sai/iqtree/variants_maf3_miss7_noHighCov.recode.vcf -o ST_ST_1500
+
+sbatch slurm_iqtree.sh
+    ## GTR+F+R3 chosen by BIC
+```
+
+
+Change tip labels
+```{bash}
+sed 's/CB_GI/GI/g' variants_maf3_miss7_noHighCov.recode.min4.phy.contree |\
+sed 's/CB_HMP/HM/g' |\
+sed 's/CB_JD/JD/g' |\
+sed 's/CB_KL/KL/g' |\
+sed 's/CB_SI/SI/g' |\
+sed 's/CB_SO/SO/g' |\
+sed 's/DB_212/LM/g' |\
+sed 's/DB_268/MM/g' |\
+sed 's/DB_WM/WM/g' |\
+sed 's/MB_KO/KO/g' |\
+sed 's/PB_CC/CC/g' |\
+sed 's/RB_AI/AI/g' |\
+sed 's/RB_GT/GT/g' |\
+sed 's/RB_HI/CA/g' |\
+sed 's/RB_LS/LS/g' |\
+sed 's/RB_RM/RM/g' |\
+sed 's/RB_SR/SR/g' |\
+sed 's/RB_SS/SS/g' |\
+sed 's/RB_WY/WK/g' |\
+sed 's/SN_LM/ML/g' > bh2tree.contree
+```
 
 
 
