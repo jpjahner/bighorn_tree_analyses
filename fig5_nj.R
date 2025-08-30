@@ -19,20 +19,21 @@ gprobs <- read.csv("gprob3_bighorn_tree.txt", header=TRUE)
 gprobs_noname <- gprobs[,-1]
 	dim(gprobs_noname)
 	gprobs_noname[1:10,1:10]
-
-pops <- read.delim("bighorn_tree_10inds_pops_190.txt", header=FALSE)
-	dim(pops)
-	head(pops)
+	
+new_pops <- read.delim("bighorn_tree_10inds_pops_190_renamed.txt", header=FALSE)
+	dim(new_pops)
+	head(new_pops)
 
 
 ## calculate pairwise fst
 
-uniq_pops <- unique(pops)
+uniq_pops <- c("CA", "RM", "SR", "SS", "AI", "LS", "WK", "GT", "ML", "WM", "LM", "MM", "KO", "CC", "JD", "KL", "SO", "GI", "SI", "HM")
+	## matches order for Table S4
 
-afreqs <- matrix(0, length(uniq_pops[,1]), dim(gprobs_noname)[2])
-for (i in 1:length(uniq_pops[,1]))
+afreqs <- matrix(0, length(uniq_pops), dim(gprobs_noname)[2])
+for (i in 1:length(uniq_pops))
 	{
-	sub_dat <- subset(gprobs_noname, pops[,1]==as.character(uniq_pops[i,1]))
+	sub_dat <- subset(gprobs_noname, new_pops[,1]==as.character(uniq_pops[i]))
 	for (j in 1:dim(gprobs_noname)[2])
 		{
 		af <- mean(sub_dat[,j]) / 2
@@ -52,11 +53,11 @@ hudsonFst2<-function(p1=NA, p2=NA, n1=NA, n2=NA)
     return(out)
 	}
 
-fst_mean_out <- matrix(0, length(uniq_pops[,1]), length(uniq_pops[,1]))
+fst_mean_out <- matrix(0, length(uniq_pops), length(uniq_pops))
 
-for (i in 1:length(uniq_pops[,1]))
+for (i in 1:length(uniq_pops))
 	{
-	for (j in 1:length(uniq_pops[,1]))
+	for (j in 1:length(uniq_pops))
 		{
 		if (i==j) { fst_mean_out[i,j] <- 0 }
 		else if (i>j)
@@ -80,25 +81,24 @@ for (i in 1:length(uniq_pops[,1]))
 		}
 	}
 
-rownames(fst_mean_out) <- uniq_pops[,1]
-colnames(fst_mean_out) <- uniq_pops[,1]
+rownames(fst_mean_out) <- uniq_pops
+colnames(fst_mean_out) <- uniq_pops
 
-#write.table(fst_mean_out, file="fst_mean_out.txt", quote=F)
+write.table(fst_mean_out, file="fst_mean_out.txt", quote=F)
 
 
 ## nj tree
 
-tr <- rotate(nj(as.dist(fst_mean_out)), 21) ## rotated WM and ML node for visual aesthetics
+tr <- nj(as.dist(fst_mean_out))
 #quartz(height=6,width=6)
 pdf(file="fig5_nj.pdf", height=6, width=6)
 par(mar=c(0,0,0,0))
 plot(tr, type="unrooted", use.edge.length=TRUE, edge.width=3, label.offset=2)
-tiplabels(	pch=c(24,21,21,22,25,23,22,23,21,24,25,25,23,21,21,22,23,24,22,21), bg=c("#007FDA", "grey60", "#007FDA", "#007FDA", "#007FDA", "#007FDA", rep("#FF441E", 5), "#B300BE", "grey60", "#B300BE", "grey60", "#B300BE", "#B300BE", "#B300BE", "grey60", "#FFCB53"), col=c("black", "#007FDA", rep("black", 10), "#B300BE", "black", "#B300BE", "black", "black", "black", "#B300BE", "black"), cex=2.5, lwd=2.5)
+tiplabels(pch=c(21,22,23,24,25,21,22,23,21,21,22,23,24,25,21,22,23,24,25,21), bg=c(rep("#B300BE",5), rep("grey60",3), "#FFCB53", rep("#FF441E",5), rep("#007FDA",5), "grey60"), col=c(rep("black", 5), rep("#B300BE",3), rep("black", 11), "#007FDA"), cex=2.5, lwd=2.5)
 legend("bottomright", legend=c("CA", "RM", "SR", "SS", "AI", "LS", "WK", "GT"), pch=c(21,22,23,24,25,21,22,23), pt.bg=c(rep("#B300BE",5), rep("grey60",3)), col=c(rep("black",5), rep("#B300BE",3)), pt.cex=1.75, cex=1.1)
 legend("topleft", legend=c("WM", "LM", "MM", "KO", "CC", "ML"), pch=c(21,22,23,24,25,21), pt.bg=c(rep("#FF441E",5), "#FFCB53"), pt.cex=1.75, cex=1.1)
-legend("bottomleft", legend=c("JD", "KL", "SO", "GI", "SI", "HM"), pch=c(21,22,23,24,25,21), pt.bg=c(rep("#007FDA",5), "grey60"), col=c(rep("black",5), "#007FDA"), pt.cex=1.75, cex=1.1)
+legend("topright", legend=c("JD", "KL", "SO", "GI", "SI", "HM"), pch=c(21,22,23,24,25,21), pt.bg=c(rep("#007FDA",5), "grey60"), col=c(rep("black",5), "#007FDA"), pt.cex=1.75, cex=1.1)
 dev.off()
-
 
 
 
